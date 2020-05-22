@@ -16,6 +16,7 @@ Jekyllでブログを建てるのはGitHubからフォークしてくるだけ�
 <hr>
 
 Dockerを立ち上げます
+
 ~~~
 $ docker pull jekyll/jekyll
 $ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash
