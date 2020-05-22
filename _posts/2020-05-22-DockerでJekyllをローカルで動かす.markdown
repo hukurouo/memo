@@ -5,7 +5,9 @@ date:   2020-05-23 00:17:29 +0900
 categories: jekyll docker
 tags: memo
 ---
-Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなると中々苦戦したのでメモに残します
+GithubPages＋Jekyllで技術ブログをつくってみました
+
+Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します
 
 [https://jamstackthemes.dev/ssg/jekyll/][url-1]
 
@@ -13,19 +15,16 @@ Jekyllでブログを建てるのはGitHubからフォークしてくるだけ�
 
 <hr>
 
-a
+Dockerを立ち上げます
+~~~
+$ docker pull jekyll/jekyll
+$ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash
+~~~
 
+任意のディレクトリにはJekyllファイルを置いた場所を指定します
 
+あとは `bundle install` して `jekyll serve` をすれば、起動します
 
-Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit numbers, and `
-{% highlight ruby %}
-def print_hi(name)
-  puts "Hi, #{name}"
-end
-print_hi('Tom')
-#=> prints 'Hi, Tom' to STDOUT.
-{% endhighlight %}
-
-Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].
+ドキュメントには `bundle exec jekyll serve` で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした...　
 
 [url-1]: https://jamstackthemes.dev/ssg/jekyll/
