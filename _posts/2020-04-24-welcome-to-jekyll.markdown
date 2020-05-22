@@ -3,6 +3,7 @@ layout: post
 title:  "Welcome to Jekyll!"
 date:   2020-04-24 15:10:56 +0900
 categories: jekyll update
+tags: javascript
 ---
 You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run `jekyll serve`, which launches a web server and auto-regenerates your site when a file is updated.
 
@@ -11,6 +12,9 @@ Jekyll requires blog post files to be named according to the following format:
 `YEAR-MONTH-DAY-title.MARKUP`
 
 Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit numbers, and `MARKUP` is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.
+
+「シャッフルして学習」機能を搭載、効率的で効果的な復習方法に ...note.com › 単語帳Ｆ
+2019/02/28 - どうしても、この単語の次はこれ…と無意識に覚えてしまうもの。 そんな時は、オプションの「シャッフル」を設定！ カードの順番をランダムに並べ替えて学習できます。 □『 ...
 
 Jekyll also offers powerful support for code snippets:
 
