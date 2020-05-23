@@ -22,7 +22,7 @@ $ docker pull jekyll/jekyll
 $ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash
 ~~~
 
-任意のディレクトリにはJekyllファイルを置いた場所を指定します
+任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します
 
 あとは `bundle install` して `jekyll serve` をすれば、起動します
 
