@@ -17,6 +17,7 @@ tags: study
     - 設定より規約が優先される (Convention Over Configuration)
         - レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし
 
+
 - `rails new -h` でアプリケーションビルダで使えるすべてのオプションを確認できる
 
 - strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する
@@ -35,7 +36,6 @@ private
     params.require(:article).permit(:title, :text)
   end
 
-#共用できるようにメソッドをくくりだしておくのが一般的  
 {% endhighlight %}
 
 - 記事モデルにbelongするコメントモデルの実装
