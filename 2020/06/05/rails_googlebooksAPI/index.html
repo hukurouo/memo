@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>GoogleBooksAPIとRailsで書籍登録</title>
+  <meta name="description" content="環境 ruby 2.5.8 rails 5.2.4 Bootstrap 3.4 完成図 タイトルをクリックすると、 フォームに値がセットされ、簡単に書籍登録ができます。 実装 BooksControllerは作ってあることとします。 まずは書籍検索機能です。 今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。 def new @book = Book.new #書籍検索APIの処理 if params[:keyword].present? require &#39;net/http&#39; url = &#39;https://www.googleapis.com/books/v1/volumes?q=&#39; request = url + params[:keyword] enc_str = URI.encode(request) uri = URI.parse(enc_str) json = Net::HTTP.get(uri) @bookjson = JSON.parse(json) count = 5 #検索結果に表示する数 @books = Array.new(count).map{Array.new(4)} count.times do |x| @books[x][0] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;title&quot;) @books[x][1] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;imageLinks&quot;, &quot;thumbnail&quot;) @books[x][2] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;authors&quot;) @books[x][2] = @books[x][2].join(&#39;,&#39;) if @books[x][2] #複数著者をカンマで区切る @books[x][3] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;industryIdentifiers&quot;, 0, &quot;identifier&quot;) end end end GoogleBookAPIは特に登録などしなくとも、 https://www.googleapis.com/books/v1/volumes?q=に検索ワードを与えてあげれば検索結果をjson形式で返してくれます。 Railsで検索した時はこんな感じです↓ https://www.googleapis.com/books/v1/volumes?q=rails 取得したjsonはJSON.parceを使ってハッシュに変換して、そこから欲しい値を抜き出していきます。 @bookjson[&quot;items&quot;][x][volumeInfo][title] でも取得はできるのですが、一部のデータが存在しないとNoMethodErrorが発生してしまいます。条件分岐で例外処理もできますが、やや冗長。 ということでdigメソッドを用いてハッシュを掘っています。キーに対応する値が存在しなければnilを返してくれるので安心ですね。 ビューに検索窓と検索結果欄を作ります。 &amp;lt;h1&amp;gt;書籍の新規登録&amp;lt;/h1&amp;gt; &amp;lt;%= form_tag(&#39;/booksearch&#39;, method: :get) do %&amp;gt; &amp;lt;div class=&quot;input-group&quot;&amp;gt; &amp;lt;%= search_field_tag &quot;keyword&quot;, params[:keyword], class: &quot;form-control&quot;, placeholder: &quot;キーワード検索&quot; %&amp;gt; &amp;lt;span class=&quot;input-group-btn&quot;&amp;gt; &amp;lt;%= submit_tag &quot;検索&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;/span&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;h2&amp;gt;検索結果&amp;lt;/h2&amp;gt; &amp;lt;% if @books.present? %&amp;gt; &amp;lt;% @books.each do |book| %&amp;gt; &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= book[0] %&amp;gt; | &amp;lt;%= book[2] %&amp;gt; | &amp;lt;%= book[3] %&amp;gt; &amp;lt;br&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;% end %&amp;gt; 検索窓用のルーティングも書いてあげましょう resources :books get &#39;/booksearch&#39;, to: &#39;books#new&#39; これで検索機能は完成です。 続いて、書籍登録のフォームを用意します。 &amp;lt;%= form_with scope: :book, url: books_path, local: true do |form| %&amp;gt; &amp;lt;%= render &#39;shared/error_messages&#39; %&amp;gt; &amp;lt;%= form.label :title %&amp;gt; &amp;lt;%= form.text_field :title, class: &#39;form-control&#39;, value: &quot;#{@title}&quot; %&amp;gt; &amp;lt;%= form.label :author %&amp;gt; &amp;lt;%= form.text_field :author, class: &#39;form-control&#39;, value: &quot;#{@author}&quot; %&amp;gt; &amp;lt;%= form.label :code %&amp;gt; &amp;lt;%= form.text_field :code, class: &#39;form-control&#39;, value: &quot;#{@code}&quot; %&amp;gt; &amp;lt;%= form.hidden_field :img, class: &#39;form-control&#39;, value: &quot;#{@img}&quot; % &amp;lt;%= form.submit &quot;Save Book&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;% end %&amp;gt; value: &quot;#{@title}&quot;としているのがポイントで、これで値を受け取ります。 画像サムネイルのURLは手直しが発生することがないのでhidden_fieldで受け取っています。 フォームに値を送信する仕組みを作ります。 ... &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= link_to book[0], controller: &quot;books&quot;, action: &quot;new&quot;, title: book[0], code: book[3], author: book[2], img: book[1] %&amp;gt; &amp;lt;%= book[2] %&amp;gt; | ... 先程の検索結果に表示させたいた book[0]（※書籍のタイトル）にクエリ付きのリンクを貼ります。これでコントローラに値を送信します。 def new ... @title = params[:title] if params[:title].present? @code = params[:code] if params[:code].present? @author = params[:author] if params[:author].present? @img = params[:img] if params[:img].present? end newアクションにクエリパラメータを受け取る処理を追記しました。ビュー（フォーム）用にインスタンス変数に格納します。 これにて完成です。">
+  
+
+  <link rel="stylesheet" href="/memo/assets/main.css">
+  <link rel="canonical" href="https://hukurouo.github.io/memo/2020/06/05/rails_googlebooksAPI/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="memonado" href="https://hukurouo.github.io/memo/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="GoogleBooksAPIとRailsで書籍登録">
+  <meta property="og:site_name" content="memonado">
+  <meta property="og:url" content="https://hukurouo.github.io/memo/2020/06/05/rails_googlebooksAPI/">
+  <meta property="og:description" content="環境 ruby 2.5.8 rails 5.2.4 Bootstrap 3.4 完成図 タイトルをクリックすると、 フォームに値がセットされ、簡単に書籍登録ができます。 実装 BooksControllerは作ってあることとします。 まずは書籍検索機能です。 今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。 def new @book = Book.new #書籍検索APIの処理 if params[:keyword].present? require &#39;net/http&#39; url = &#39;https://www.googleapis.com/books/v1/volumes?q=&#39; request = url + params[:keyword] enc_str = URI.encode(request) uri = URI.parse(enc_str) json = Net::HTTP.get(uri) @bookjson = JSON.parse(json) count = 5 #検索結果に表示する数 @books = Array.new(count).map{Array.new(4)} count.times do |x| @books[x][0] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;title&quot;) @books[x][1] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;imageLinks&quot;, &quot;thumbnail&quot;) @books[x][2] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;authors&quot;) @books[x][2] = @books[x][2].join(&#39;,&#39;) if @books[x][2] #複数著者をカンマで区切る @books[x][3] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;industryIdentifiers&quot;, 0, &quot;identifier&quot;) end end end GoogleBookAPIは特に登録などしなくとも、 https://www.googleapis.com/books/v1/volumes?q=に検索ワードを与えてあげれば検索結果をjson形式で返してくれます。 Railsで検索した時はこんな感じです↓ https://www.googleapis.com/books/v1/volumes?q=rails 取得したjsonはJSON.parceを使ってハッシュに変換して、そこから欲しい値を抜き出していきます。 @bookjson[&quot;items&quot;][x][volumeInfo][title] でも取得はできるのですが、一部のデータが存在しないとNoMethodErrorが発生してしまいます。条件分岐で例外処理もできますが、やや冗長。 ということでdigメソッドを用いてハッシュを掘っています。キーに対応する値が存在しなければnilを返してくれるので安心ですね。 ビューに検索窓と検索結果欄を作ります。 &amp;lt;h1&amp;gt;書籍の新規登録&amp;lt;/h1&amp;gt; &amp;lt;%= form_tag(&#39;/booksearch&#39;, method: :get) do %&amp;gt; &amp;lt;div class=&quot;input-group&quot;&amp;gt; &amp;lt;%= search_field_tag &quot;keyword&quot;, params[:keyword], class: &quot;form-control&quot;, placeholder: &quot;キーワード検索&quot; %&amp;gt; &amp;lt;span class=&quot;input-group-btn&quot;&amp;gt; &amp;lt;%= submit_tag &quot;検索&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;/span&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;h2&amp;gt;検索結果&amp;lt;/h2&amp;gt; &amp;lt;% if @books.present? %&amp;gt; &amp;lt;% @books.each do |book| %&amp;gt; &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= book[0] %&amp;gt; | &amp;lt;%= book[2] %&amp;gt; | &amp;lt;%= book[3] %&amp;gt; &amp;lt;br&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;% end %&amp;gt; 検索窓用のルーティングも書いてあげましょう resources :books get &#39;/booksearch&#39;, to: &#39;books#new&#39; これで検索機能は完成です。 続いて、書籍登録のフォームを用意します。 &amp;lt;%= form_with scope: :book, url: books_path, local: true do |form| %&amp;gt; &amp;lt;%= render &#39;shared/error_messages&#39; %&amp;gt; &amp;lt;%= form.label :title %&amp;gt; &amp;lt;%= form.text_field :title, class: &#39;form-control&#39;, value: &quot;#{@title}&quot; %&amp;gt; &amp;lt;%= form.label :author %&amp;gt; &amp;lt;%= form.text_field :author, class: &#39;form-control&#39;, value: &quot;#{@author}&quot; %&amp;gt; &amp;lt;%= form.label :code %&amp;gt; &amp;lt;%= form.text_field :code, class: &#39;form-control&#39;, value: &quot;#{@code}&quot; %&amp;gt; &amp;lt;%= form.hidden_field :img, class: &#39;form-control&#39;, value: &quot;#{@img}&quot; % &amp;lt;%= form.submit &quot;Save Book&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;% end %&amp;gt; value: &quot;#{@title}&quot;としているのがポイントで、これで値を受け取ります。 画像サムネイルのURLは手直しが発生することがないのでhidden_fieldで受け取っています。 フォームに値を送信する仕組みを作ります。 ... &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= link_to book[0], controller: &quot;books&quot;, action: &quot;new&quot;, title: book[0], code: book[3], author: book[2], img: book[1] %&amp;gt; &amp;lt;%= book[2] %&amp;gt; | ... 先程の検索結果に表示させたいた book[0]（※書籍のタイトル）にクエリ付きのリンクを貼ります。これでコントローラに値を送信します。 def new ... @title = params[:title] if params[:title].present? @code = params[:code] if params[:code].present? @author = params[:author] if params[:author].present? @img = params[:img] if params[:img].present? end newアクションにクエリパラメータを受け取る処理を追記しました。ビュー（フォーム）用にインスタンス変数に格納します。 これにて完成です。">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="hukurou_code">
+  <meta name="twitter:title" content="GoogleBooksAPIとRailsで書籍登録">
+  <meta name="twitter:description" content="環境 ruby 2.5.8 rails 5.2.4 Bootstrap 3.4 完成図 タイトルをクリックすると、 フォームに値がセットされ、簡単に書籍登録ができます。 実装 BooksControllerは作ってあることとします。 まずは書籍検索機能です。 今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。 def new @b...">
+  
+    <meta name="twitter:creator" content="hukurou_code">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Bitter:400,400i,700&display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/memo/">memonado</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/memo/about/">About</a>
+      
+        
+        <a class="page-link" href="/memo/archives/">Archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">GoogleBooksAPIとRailsで書籍登録</h1>
+    
+    <p class="post-meta"><time datetime="2020-06-05T04:24:44+00:00" itemprop="datePublished">Jun 5, 2020</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/rails/">Rails</a>,
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/googlebooksapi/">GoogleBooksAPI</a>
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/memo/tags/memo/">memo</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h4>環境</h4>
+<ul>
+  <li>ruby  2.5.8</li>
+  <li>rails 5.2.4</li>
+  <li>Bootstrap 3.4</li>
+</ul>
+
+<h4>完成図</h4>
+
+<p><img src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/422212/cdd1797b-465e-8141-530f-de1ff1877847.png" alt="image.png" /></p>
+
+<p>タイトルをクリックすると、</p>
+
+<p><img src="https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/422212/69eafb76-46ac-9880-e5f0-8ba0e2895cf9.png" alt="image.png" /></p>
+
+<p>フォームに値がセットされ、簡単に書籍登録ができます。</p>
+
+<h4>実装</h4>
+
+<p>BooksControllerは作ってあることとします。</p>
+
+<p>まずは書籍検索機能です。
+今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="k">def</span> <span class="nf">new</span>
+    <span class="vi">@book</span> <span class="o">=</span> <span class="no">Book</span><span class="p">.</span><span class="nf">new</span>
+
+    <span class="c1">#書籍検索APIの処理</span>
+    <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:keyword</span><span class="p">].</span><span class="nf">present?</span>
+      <span class="nb">require</span> <span class="s1">'net/http'</span>
+      <span class="n">url</span> <span class="o">=</span> <span class="s1">'https://www.googleapis.com/books/v1/volumes?q='</span>
+      <span class="n">request</span> <span class="o">=</span> <span class="n">url</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="ss">:keyword</span><span class="p">]</span>
+      <span class="n">enc_str</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">encode</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+      <span class="n">uri</span> <span class="o">=</span> <span class="no">URI</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">enc_str</span><span class="p">)</span>
+      <span class="n">json</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+      <span class="vi">@bookjson</span> <span class="o">=</span> <span class="no">JSON</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+
+      <span class="n">count</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1">#検索結果に表示する数</span>
+      <span class="vi">@books</span> <span class="o">=</span> <span class="no">Array</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">count</span><span class="p">).</span><span class="nf">map</span><span class="p">{</span><span class="no">Array</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">4</span><span class="p">)}</span>
+      <span class="n">count</span><span class="p">.</span><span class="nf">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+        <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@bookjson</span><span class="p">.</span><span class="nf">dig</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"volumeInfo"</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">)</span>
+        <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@bookjson</span><span class="p">.</span><span class="nf">dig</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"volumeInfo"</span><span class="p">,</span> <span class="s2">"imageLinks"</span><span class="p">,</span> <span class="s2">"thumbnail"</span><span class="p">)</span>
+        <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@bookjson</span><span class="p">.</span><span class="nf">dig</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"volumeInfo"</span><span class="p">,</span> <span class="s2">"authors"</span><span class="p">)</span>
+        <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">2</span><span class="p">].</span><span class="nf">join</span><span class="p">(</span><span class="s1">','</span><span class="p">)</span> <span class="k">if</span> <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="c1">#複数著者をカンマで区切る</span>
+        <span class="vi">@books</span><span class="p">[</span><span class="n">x</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="vi">@bookjson</span><span class="p">.</span><span class="nf">dig</span><span class="p">(</span><span class="s2">"items"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"volumeInfo"</span><span class="p">,</span> <span class="s2">"industryIdentifiers"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"identifier"</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span></code></pre></figure>
+
+<p>GoogleBookAPIは特に登録などしなくとも、
+<code class="highlighter-rouge">https://www.googleapis.com/books/v1/volumes?q=</code>に検索ワードを与えてあげれば検索結果をjson形式で返してくれます。</p>
+
+<p>Railsで検索した時はこんな感じです↓
+https://www.googleapis.com/books/v1/volumes?q=rails</p>
+
+<p>取得したjsonはJSON.parceを使ってハッシュに変換して、そこから欲しい値を抜き出していきます。</p>
+
+<p><code class="highlighter-rouge">@bookjson["items"][x][volumeInfo][title]</code> でも取得はできるのですが、一部のデータが存在しないとNoMethodErrorが発生してしまいます。条件分岐で例外処理もできますが、やや冗長。</p>
+
+<p>ということでdigメソッドを用いてハッシュを掘っています。キーに対応する値が存在しなければnilを返してくれるので安心ですね。</p>
+
+<p>ビューに検索窓と検索結果欄を作ります。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;h1&gt;書籍の新規登録&lt;/h1&gt;
+  &lt;%= form_tag('/booksearch', method: :get) do %&gt;
+    &lt;div class="input-group"&gt;
+      &lt;%= search_field_tag "keyword", params[:keyword], class: "form-control", placeholder: "キーワード検索" %&gt;
+        &lt;span class="input-group-btn"&gt;
+          &lt;%= submit_tag "検索", class: "btn btn-primary" %&gt;
+        &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;% end %&gt;
+&lt;h2&gt;検索結果&lt;/h2&gt;
+&lt;% if @books.present? %&gt;
+  &lt;% @books.each do |book| %&gt;
+     &lt;img src="&lt;%= book[1] %&gt;" width="40" vspace="2"&gt;
+     &lt;%= book[0] %&gt; |
+     &lt;%= book[2] %&gt; | 
+     &lt;%= book[3] %&gt; &lt;br&gt;
+  &lt;% end %&gt;
+&lt;% end %&gt;
+</code></pre></div></div>
+
+<p>検索窓用のルーティングも書いてあげましょう</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="n">resources</span> <span class="ss">:books</span>
+  <span class="n">get</span> <span class="s1">'/booksearch'</span><span class="p">,</span> <span class="ss">to: </span><span class="s1">'books#new'</span></code></pre></figure>
+
+<p>これで検索機能は完成です。</p>
+
+<p>続いて、書籍登録のフォームを用意します。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;%= form_with scope: :book, url: books_path, local: true do |form| %&gt;
+  &lt;%= render 'shared/error_messages' %&gt;
+  &lt;%= form.label :title %&gt;
+  &lt;%= form.text_field :title, class: 'form-control', value: "#{@title}" %&gt;
+
+  &lt;%= form.label :author %&gt;
+  &lt;%= form.text_field :author, class: 'form-control', value: "#{@author}" %&gt;
+
+  &lt;%= form.label :code %&gt;
+  &lt;%= form.text_field :code, class: 'form-control', value: "#{@code}" %&gt;
+
+  &lt;%= form.hidden_field :img, class: 'form-control', value: "#{@img}" %
+
+  &lt;%= form.submit "Save Book", class: "btn btn-primary" %&gt;
+&lt;% end %&gt;
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">value: "#{@title}"</code>としているのがポイントで、これで値を受け取ります。
+画像サムネイルのURLは手直しが発生することがないので<code class="highlighter-rouge">hidden_field</code>で受け取っています。</p>
+
+<p>フォームに値を送信する仕組みを作ります。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+&lt;img src="&lt;%= book[1] %&gt;" width="40" vspace="2"&gt;
+&lt;%= link_to book[0], controller: "books", action: "new", title: book[0], code: book[3], author: book[2], img: book[1] %&gt;
+&lt;%= book[2] %&gt; | 
+...
+</code></pre></div></div>
+
+<p>先程の検索結果に表示させたいた book[0]（※書籍のタイトル）にクエリ付きのリンクを貼ります。これでコントローラに値を送信します。</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">  <span class="k">def</span> <span class="nf">new</span>
+    <span class="o">...</span>
+    <span class="vi">@title</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:title</span><span class="p">]</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:title</span><span class="p">].</span><span class="nf">present?</span>
+    <span class="vi">@code</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:code</span><span class="p">]</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:code</span><span class="p">].</span><span class="nf">present?</span>
+    <span class="vi">@author</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:author</span><span class="p">]</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:author</span><span class="p">].</span><span class="nf">present?</span>
+    <span class="vi">@img</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="ss">:img</span><span class="p">]</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="ss">:img</span><span class="p">].</span><span class="nf">present?</span>
+  <span class="k">end</span></code></pre></figure>
+
+<p>newアクションにクエリパラメータを受け取る処理を追記しました。ビュー（フォーム）用にインスタンス変数に格納します。</p>
+
+<p>これにて完成です。</p>
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; hukurouo - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="https://hukurouo.github.io/memo/feed.xml">RSS</a>
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

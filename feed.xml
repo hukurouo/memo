@@ -1,0 +1,598 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+  <generator uri="http://jekyllrb.com" version="4.0.1">Jekyll</generator>
+  
+  
+  <link href="https://hukurouo.github.io/memo/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="https://hukurouo.github.io/memo/" rel="alternate" type="text/html" hreflang="en" />
+  <updated>2020-06-05T14:52:32+00:00</updated>
+  <id>https://hukurouo.github.io/memo//</id>
+
+  
+    <title type="html">memonado</title>
+  
+
+  
+    <subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle>
+  
+
+  
+    <author>
+        <name>hukurouo</name>
+      
+      
+    </author>
+  
+
+  
+  
+    <entry>
+      
+      <title type="html">GoogleBooksAPIとRailsで書籍登録</title>
+      
+      
+      <link href="https://hukurouo.github.io/memo/2020/06/05/rails_googlebooksAPI/" rel="alternate" type="text/html" title="GoogleBooksAPIとRailsで書籍登録" />
+      
+      <published>2020-06-05T04:24:44+00:00</published>
+      <updated>2020-06-05T04:24:44+00:00</updated>
+      <id>https://hukurouo.github.io/memo/2020/06/05/rails_googlebooksAPI</id>
+      <content type="html" xml:base="https://hukurouo.github.io/memo/2020/06/05/rails_googlebooksAPI/">&lt;h4&gt;環境&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;ruby  2.5.8&lt;/li&gt;
+  &lt;li&gt;rails 5.2.4&lt;/li&gt;
+  &lt;li&gt;Bootstrap 3.4&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;完成図&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/422212/cdd1797b-465e-8141-530f-de1ff1877847.png&quot; alt=&quot;image.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;タイトルをクリックすると、&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/422212/69eafb76-46ac-9880-e5f0-8ba0e2895cf9.png&quot; alt=&quot;image.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;フォームに値がセットされ、簡単に書籍登録ができます。&lt;/p&gt;
+
+&lt;h4&gt;実装&lt;/h4&gt;
+
+&lt;p&gt;BooksControllerは作ってあることとします。&lt;/p&gt;
+
+&lt;p&gt;まずは書籍検索機能です。
+今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@book&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Book&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;#書籍検索APIの処理&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:keyword&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;present?&lt;/span&gt;
+      &lt;span class=&quot;nb&quot;&gt;require&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'net/http'&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'https://www.googleapis.com/books/v1/volumes?q='&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;request&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:keyword&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;enc_str&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;request&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;URI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;enc_str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;json&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Net&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;::&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;HTTP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uri&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;vi&quot;&gt;@bookjson&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;parse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+      &lt;span class=&quot;n&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#検索結果に表示する数&lt;/span&gt;
+      &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;map&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;no&quot;&gt;Array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)}&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;times&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;
+        &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@bookjson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;items&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;volumeInfo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;title&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@bookjson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;items&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;volumeInfo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;imageLinks&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;thumbnail&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@bookjson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;items&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;volumeInfo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;authors&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;','&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;#複数著者をカンマで区切る&lt;/span&gt;
+        &lt;span class=&quot;vi&quot;&gt;@books&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@bookjson&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;dig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;items&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;volumeInfo&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;industryIdentifiers&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;identifier&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;GoogleBookAPIは特に登録などしなくとも、
+&lt;code class=&quot;highlighter-rouge&quot;&gt;https://www.googleapis.com/books/v1/volumes?q=&lt;/code&gt;に検索ワードを与えてあげれば検索結果をjson形式で返してくれます。&lt;/p&gt;
+
+&lt;p&gt;Railsで検索した時はこんな感じです↓
+https://www.googleapis.com/books/v1/volumes?q=rails&lt;/p&gt;
+
+&lt;p&gt;取得したjsonはJSON.parceを使ってハッシュに変換して、そこから欲しい値を抜き出していきます。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;@bookjson[&quot;items&quot;][x][volumeInfo][title]&lt;/code&gt; でも取得はできるのですが、一部のデータが存在しないとNoMethodErrorが発生してしまいます。条件分岐で例外処理もできますが、やや冗長。&lt;/p&gt;
+
+&lt;p&gt;ということでdigメソッドを用いてハッシュを掘っています。キーに対応する値が存在しなければnilを返してくれるので安心ですね。&lt;/p&gt;
+
+&lt;p&gt;ビューに検索窓と検索結果欄を作ります。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;h1&amp;gt;書籍の新規登録&amp;lt;/h1&amp;gt;
+  &amp;lt;%= form_tag('/booksearch', method: :get) do %&amp;gt;
+    &amp;lt;div class=&quot;input-group&quot;&amp;gt;
+      &amp;lt;%= search_field_tag &quot;keyword&quot;, params[:keyword], class: &quot;form-control&quot;, placeholder: &quot;キーワード検索&quot; %&amp;gt;
+        &amp;lt;span class=&quot;input-group-btn&quot;&amp;gt;
+          &amp;lt;%= submit_tag &quot;検索&quot;, class: &quot;btn btn-primary&quot; %&amp;gt;
+        &amp;lt;/span&amp;gt;
+    &amp;lt;/div&amp;gt;
+  &amp;lt;% end %&amp;gt;
+&amp;lt;h2&amp;gt;検索結果&amp;lt;/h2&amp;gt;
+&amp;lt;% if @books.present? %&amp;gt;
+  &amp;lt;% @books.each do |book| %&amp;gt;
+     &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt;
+     &amp;lt;%= book[0] %&amp;gt; |
+     &amp;lt;%= book[2] %&amp;gt; | 
+     &amp;lt;%= book[3] %&amp;gt; &amp;lt;br&amp;gt;
+  &amp;lt;% end %&amp;gt;
+&amp;lt;% end %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;検索窓用のルーティングも書いてあげましょう&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;  &lt;span class=&quot;n&quot;&gt;resources&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:books&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;get&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'/booksearch'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;to: &lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'books#new'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;これで検索機能は完成です。&lt;/p&gt;
+
+&lt;p&gt;続いて、書籍登録のフォームを用意します。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;%= form_with scope: :book, url: books_path, local: true do |form| %&amp;gt;
+  &amp;lt;%= render 'shared/error_messages' %&amp;gt;
+  &amp;lt;%= form.label :title %&amp;gt;
+  &amp;lt;%= form.text_field :title, class: 'form-control', value: &quot;#{@title}&quot; %&amp;gt;
+
+  &amp;lt;%= form.label :author %&amp;gt;
+  &amp;lt;%= form.text_field :author, class: 'form-control', value: &quot;#{@author}&quot; %&amp;gt;
+
+  &amp;lt;%= form.label :code %&amp;gt;
+  &amp;lt;%= form.text_field :code, class: 'form-control', value: &quot;#{@code}&quot; %&amp;gt;
+
+  &amp;lt;%= form.hidden_field :img, class: 'form-control', value: &quot;#{@img}&quot; %
+
+  &amp;lt;%= form.submit &quot;Save Book&quot;, class: &quot;btn btn-primary&quot; %&amp;gt;
+&amp;lt;% end %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;value: &quot;#{@title}&quot;&lt;/code&gt;としているのがポイントで、これで値を受け取ります。
+画像サムネイルのURLは手直しが発生することがないので&lt;code class=&quot;highlighter-rouge&quot;&gt;hidden_field&lt;/code&gt;で受け取っています。&lt;/p&gt;
+
+&lt;p&gt;フォームに値を送信する仕組みを作ります。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;...
+&amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt;
+&amp;lt;%= link_to book[0], controller: &quot;books&quot;, action: &quot;new&quot;, title: book[0], code: book[3], author: book[2], img: book[1] %&amp;gt;
+&amp;lt;%= book[2] %&amp;gt; | 
+...
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;先程の検索結果に表示させたいた book[0]（※書籍のタイトル）にクエリ付きのリンクを貼ります。これでコントローラに値を送信します。&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;
+    &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@title&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;present?&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@code&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:code&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;present?&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@author&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:author&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:author&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;present?&lt;/span&gt;
+    &lt;span class=&quot;vi&quot;&gt;@img&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:img&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:img&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;present?&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;newアクションにクエリパラメータを受け取る処理を追記しました。ビュー（フォーム）用にインスタンス変数に格納します。&lt;/p&gt;
+
+&lt;p&gt;これにて完成です。&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>hukurouo</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="Rails" />
+      
+        <category term="GoogleBooksAPI" />
+      
+
+      
+        <category term="memo" />
+      
+
+      
+        <summary type="html">環境 ruby 2.5.8 rails 5.2.4 Bootstrap 3.4 完成図 タイトルをクリックすると、 フォームに値がセットされ、簡単に書籍登録ができます。 実装 BooksControllerは作ってあることとします。 まずは書籍検索機能です。 今回は書籍の登録にGoogleBookAPIを用いようと思うので、検索機能はnewアクションに記述していきます。 def new @book = Book.new #書籍検索APIの処理 if params[:keyword].present? require 'net/http' url = 'https://www.googleapis.com/books/v1/volumes?q=' request = url + params[:keyword] enc_str = URI.encode(request) uri = URI.parse(enc_str) json = Net::HTTP.get(uri) @bookjson = JSON.parse(json) count = 5 #検索結果に表示する数 @books = Array.new(count).map{Array.new(4)} count.times do |x| @books[x][0] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;title&quot;) @books[x][1] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;imageLinks&quot;, &quot;thumbnail&quot;) @books[x][2] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;authors&quot;) @books[x][2] = @books[x][2].join(',') if @books[x][2] #複数著者をカンマで区切る @books[x][3] = @bookjson.dig(&quot;items&quot;, x, &quot;volumeInfo&quot;, &quot;industryIdentifiers&quot;, 0, &quot;identifier&quot;) end end end GoogleBookAPIは特に登録などしなくとも、 https://www.googleapis.com/books/v1/volumes?q=に検索ワードを与えてあげれば検索結果をjson形式で返してくれます。 Railsで検索した時はこんな感じです↓ https://www.googleapis.com/books/v1/volumes?q=rails 取得したjsonはJSON.parceを使ってハッシュに変換して、そこから欲しい値を抜き出していきます。 @bookjson[&quot;items&quot;][x][volumeInfo][title] でも取得はできるのですが、一部のデータが存在しないとNoMethodErrorが発生してしまいます。条件分岐で例外処理もできますが、やや冗長。 ということでdigメソッドを用いてハッシュを掘っています。キーに対応する値が存在しなければnilを返してくれるので安心ですね。 ビューに検索窓と検索結果欄を作ります。 &amp;lt;h1&amp;gt;書籍の新規登録&amp;lt;/h1&amp;gt; &amp;lt;%= form_tag('/booksearch', method: :get) do %&amp;gt; &amp;lt;div class=&quot;input-group&quot;&amp;gt; &amp;lt;%= search_field_tag &quot;keyword&quot;, params[:keyword], class: &quot;form-control&quot;, placeholder: &quot;キーワード検索&quot; %&amp;gt; &amp;lt;span class=&quot;input-group-btn&quot;&amp;gt; &amp;lt;%= submit_tag &quot;検索&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;/span&amp;gt; &amp;lt;/div&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;h2&amp;gt;検索結果&amp;lt;/h2&amp;gt; &amp;lt;% if @books.present? %&amp;gt; &amp;lt;% @books.each do |book| %&amp;gt; &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= book[0] %&amp;gt; | &amp;lt;%= book[2] %&amp;gt; | &amp;lt;%= book[3] %&amp;gt; &amp;lt;br&amp;gt; &amp;lt;% end %&amp;gt; &amp;lt;% end %&amp;gt; 検索窓用のルーティングも書いてあげましょう resources :books get '/booksearch', to: 'books#new' これで検索機能は完成です。 続いて、書籍登録のフォームを用意します。 &amp;lt;%= form_with scope: :book, url: books_path, local: true do |form| %&amp;gt; &amp;lt;%= render 'shared/error_messages' %&amp;gt; &amp;lt;%= form.label :title %&amp;gt; &amp;lt;%= form.text_field :title, class: 'form-control', value: &quot;#{@title}&quot; %&amp;gt; &amp;lt;%= form.label :author %&amp;gt; &amp;lt;%= form.text_field :author, class: 'form-control', value: &quot;#{@author}&quot; %&amp;gt; &amp;lt;%= form.label :code %&amp;gt; &amp;lt;%= form.text_field :code, class: 'form-control', value: &quot;#{@code}&quot; %&amp;gt; &amp;lt;%= form.hidden_field :img, class: 'form-control', value: &quot;#{@img}&quot; % &amp;lt;%= form.submit &quot;Save Book&quot;, class: &quot;btn btn-primary&quot; %&amp;gt; &amp;lt;% end %&amp;gt; value: &quot;#{@title}&quot;としているのがポイントで、これで値を受け取ります。 画像サムネイルのURLは手直しが発生することがないのでhidden_fieldで受け取っています。 フォームに値を送信する仕組みを作ります。 ... &amp;lt;img src=&quot;&amp;lt;%= book[1] %&amp;gt;&quot; width=&quot;40&quot; vspace=&quot;2&quot;&amp;gt; &amp;lt;%= link_to book[0], controller: &quot;books&quot;, action: &quot;new&quot;, title: book[0], code: book[3], author: book[2], img: book[1] %&amp;gt; &amp;lt;%= book[2] %&amp;gt; | ... 先程の検索結果に表示させたいた book[0]（※書籍のタイトル）にクエリ付きのリンクを貼ります。これでコントローラに値を送信します。 def new ... @title = params[:title] if params[:title].present? @code = params[:code] if params[:code].present? @author = params[:author] if params[:author].present? @img = params[:img] if params[:img].present? end newアクションにクエリパラメータを受け取る処理を追記しました。ビュー（フォーム）用にインスタンス変数に格納します。 これにて完成です。</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry>
+      
+      <title type="html">Rails Study #2</title>
+      
+      
+      <link href="https://hukurouo.github.io/memo/2020/05/30/rails_study_debug/" rel="alternate" type="text/html" title="Rails Study #2" />
+      
+      <published>2020-05-30T04:24:44+00:00</published>
+      <updated>2020-05-30T04:24:44+00:00</updated>
+      <id>https://hukurouo.github.io/memo/2020/05/30/rails_study_debug</id>
+      <content type="html" xml:base="https://hukurouo.github.io/memo/2020/05/30/rails_study_debug/">&lt;p&gt;学習メモその２&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;a href=&quot;https://railsguides.jp/debugging_rails_applications.html&quot;&gt;RailsGuide - デバッグ編&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;デバッグ
+    &lt;ul&gt;
+      &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;%= debug @article %&amp;gt;&lt;/code&gt;&lt;/li&gt;
+      &lt;li&gt;オブジェクトの中身をviewに表示&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;ログをカスタムしたい場合は、以下
+    &lt;ul&gt;
+      &lt;li&gt;この場合、コントローラの途中でオブジェクトの中身を確認できる&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; def create
+    @article = Article.new(article_params)
+    logger.debug &quot;新しい記事: #{@article.attributes.inspect}&quot;
+    logger.debug &quot;記事が正しいかどうか: #{@article.valid?}&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;a href=&quot;https://railsguides.jp/active_record_basics.html&quot;&gt;RailsGuide - ActiveRecord:マイグレーション&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Active Recordは、「知的に振る舞うのはモデルであり、データベースではない」というコンセプトに基づいています。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;カラムの作成時や変更時に、カラムの修飾子を適用できる&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;limit: string/text/binary/integerフィールドの最大サイズを設定します。&lt;/li&gt;
+  &lt;li&gt;precision: decimalフィールドの精度 (precision) を定義します。この精度は、その数字の総桁数で表されます。&lt;/li&gt;
+  &lt;li&gt;scale: decimalフィールドの精度 (スケール: scale) を指定します。この精度は小数点以下の桁数で表されます。&lt;/li&gt;
+  &lt;li&gt;polymorphic: belongs_to関連付けで使うtypeカラムを追加します。&lt;/li&gt;
+  &lt;li&gt;null: カラムでNULL値を許可または禁止します。&lt;/li&gt;
+  &lt;li&gt;default: カラムでのデフォルト値の設定を許可します。dateなどの動的な値を使う場合は、デフォルト値は最初 (マイグレーションが実行された日付など) にしか計算されないことに注意してください。&lt;/li&gt;
+  &lt;li&gt;index: カラムにインデックスを追加します。&lt;/li&gt;
+  &lt;li&gt;comment: カラムにコメントを追加します。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;既存のマイグレーションを直接変更するのは一般的によくない（共同作業者にまで余分な作業を強いることになるので）&lt;/p&gt;
+
+&lt;p&gt;マイグレーションを新たに生成し、それを編集するのが一番良い&lt;/p&gt;
+
+&lt;p&gt;自分でマイグレーションファイルを書くときは、とりあえずchangeメソッドを使っておけばロールバックが出来るので、安全&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>hukurouo</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="Rails" />
+      
+
+      
+        <category term="study" />
+      
+
+      
+        <summary type="html">学習メモその２ RailsGuide - デバッグ編 デバッグ &amp;lt;%= debug @article %&amp;gt; オブジェクトの中身をviewに表示 ログをカスタムしたい場合は、以下 この場合、コントローラの途中でオブジェクトの中身を確認できる def create @article = Article.new(article_params) logger.debug &quot;新しい記事: #{@article.attributes.inspect}&quot; logger.debug &quot;記事が正しいかどうか: #{@article.valid?}&quot; RailsGuide - ActiveRecord:マイグレーション Active Recordは、「知的に振る舞うのはモデルであり、データベースではない」というコンセプトに基づいています。 カラムの作成時や変更時に、カラムの修飾子を適用できる limit: string/text/binary/integerフィールドの最大サイズを設定します。 precision: decimalフィールドの精度 (precision) を定義します。この精度は、その数字の総桁数で表されます。 scale: decimalフィールドの精度 (スケール: scale) を指定します。この精度は小数点以下の桁数で表されます。 polymorphic: belongs_to関連付けで使うtypeカラムを追加します。 null: カラムでNULL値を許可または禁止します。 default: カラムでのデフォルト値の設定を許可します。dateなどの動的な値を使う場合は、デフォルト値は最初 (マイグレーションが実行された日付など) にしか計算されないことに注意してください。 index: カラムにインデックスを追加します。 comment: カラムにコメントを追加します。 既存のマイグレーションを直接変更するのは一般的によくない（共同作業者にまで余分な作業を強いることになるので） マイグレーションを新たに生成し、それを編集するのが一番良い 自分でマイグレーションファイルを書くときは、とりあえずchangeメソッドを使っておけばロールバックが出来るので、安全</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry>
+      
+      <title type="html">GitFlowのまとめ</title>
+      
+      
+      <link href="https://hukurouo.github.io/memo/2020/05/25/GItFlowList/" rel="alternate" type="text/html" title="GitFlowのまとめ" />
+      
+      <published>2020-05-25T10:46:44+00:00</published>
+      <updated>2020-05-25T10:46:44+00:00</updated>
+      <id>https://hukurouo.github.io/memo/2020/05/25/GItFlowList</id>
+      <content type="html" xml:base="https://hukurouo.github.io/memo/2020/05/25/GItFlowList/">&lt;h4&gt;GitFlow&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;ブランチの寿命
+    &lt;ul&gt;
+      &lt;li&gt;長寿命ブランチ　→　develop、master&lt;/li&gt;
+      &lt;li&gt;短寿命ブランチ　→　feature、release、hotfix&lt;/li&gt;
+      &lt;li&gt;develop→featureのマージを随時行う。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;リリースブランチの明確化　→　本番リリース可能なのはmasterのみ&lt;/li&gt;
+  &lt;li&gt;マージ時の動作保証
+    &lt;ul&gt;
+      &lt;li&gt;feature→developのマージは開発終了時のみとするフローシステム上の「契約」&lt;/li&gt;
+      &lt;li&gt;developからmasterへのマージ時にreleaseブランチを作成し、動作を確認する。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;マージタイミングの保証
+    &lt;ul&gt;
+      &lt;li&gt;masterブランチは常にリリース可能であるというフローシステム上の「契約」&lt;/li&gt;
+      &lt;li&gt;リリースタイミングが来ない機能はfeatureおよびdevelopに保留する。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;GithubFlow&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;ブランチの寿命
+    &lt;ul&gt;
+      &lt;li&gt;長寿命ブランチ　→　master&lt;/li&gt;
+      &lt;li&gt;短寿命ブランチ　→　feature&lt;/li&gt;
+      &lt;li&gt;develop→featureのマージを随時行う。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;リリースブランチの明確化　→　本番リリース可能なのはmasterのみ&lt;/li&gt;
+  &lt;li&gt;マージ時の動作保証
+    &lt;ul&gt;
+      &lt;li&gt;masterへのマージ時にpull requestを発行し、コードレビューを行う&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;マージタイミングの保証
+    &lt;ul&gt;
+      &lt;li&gt;リリースタイミングが来ない機能はfeatureに保留する。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4&gt;GitlabFlow&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;ブランチ
+    &lt;ul&gt;
+      &lt;li&gt;feature/hotfixは機能開発、不具合対応ブランチ&lt;/li&gt;
+      &lt;li&gt;masterはメインのブランチ&lt;/li&gt;
+      &lt;li&gt;pre-production(オプションブランチ)はリリース前のテスト用(GitFlowで言うreleaseブランチ)&lt;/li&gt;
+      &lt;li&gt;productionはリリース済みのコード置き場&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;機能開発/不具合対応
+    &lt;ul&gt;
+      &lt;li&gt;機能開発するとき、masterブランチからfeature/NAMEブランチを切って開発に進む&lt;/li&gt;
+      &lt;li&gt;開発が終わったらfeatureブランチからmasterにMerge Requestを作成&lt;/li&gt;
+      &lt;li&gt;masterをステージング環境へデプロイして、確認する&lt;/li&gt;
+      &lt;li&gt;プリプロダクションへデプロイしたい場合、masterブランチからpre-productionブランチへのMerge Requestを作成 マージ済みになるとデプロイする&lt;/li&gt;
+      &lt;li&gt;pre-productionブランチからproductionブランチへのMerge Requestを作成 マージ済みになるとデプロイする&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>hukurouo</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="Git" />
+      
+
+      
+        <category term="study" />
+      
+        <category term="memo" />
+      
+
+      
+        <summary type="html">GitFlow ブランチの寿命 長寿命ブランチ　→　develop、master 短寿命ブランチ　→　feature、release、hotfix develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 feature→developのマージは開発終了時のみとするフローシステム上の「契約」 developからmasterへのマージ時にreleaseブランチを作成し、動作を確認する。 マージタイミングの保証 masterブランチは常にリリース可能であるというフローシステム上の「契約」 リリースタイミングが来ない機能はfeatureおよびdevelopに保留する。 GithubFlow ブランチの寿命 長寿命ブランチ　→　master 短寿命ブランチ　→　feature develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 masterへのマージ時にpull requestを発行し、コードレビューを行う マージタイミングの保証 リリースタイミングが来ない機能はfeatureに保留する。 GitlabFlow ブランチ feature/hotfixは機能開発、不具合対応ブランチ masterはメインのブランチ pre-production(オプションブランチ)はリリース前のテスト用(GitFlowで言うreleaseブランチ) productionはリリース済みのコード置き場 機能開発/不具合対応 機能開発するとき、masterブランチからfeature/NAMEブランチを切って開発に進む 開発が終わったらfeatureブランチからmasterにMerge Requestを作成 masterをステージング環境へデプロイして、確認する プリプロダクションへデプロイしたい場合、masterブランチからpre-productionブランチへのMerge Requestを作成 マージ済みになるとデプロイする pre-productionブランチからproductionブランチへのMerge Requestを作成 マージ済みになるとデプロイする</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry>
+      
+      <title type="html">Rails Study #1</title>
+      
+      
+      <link href="https://hukurouo.github.io/memo/2020/05/23/rails_study_1/" rel="alternate" type="text/html" title="Rails Study #1" />
+      
+      <published>2020-05-23T04:24:44+00:00</published>
+      <updated>2020-05-23T04:24:44+00:00</updated>
+      <id>https://hukurouo.github.io/memo/2020/05/23/rails_study_1</id>
+      <content type="html" xml:base="https://hukurouo.github.io/memo/2020/05/23/rails_study_1/">&lt;p&gt;復習メモその１&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://railsguides.jp/getting_started.html&quot;&gt;Railsガイド - Railsをはじめよう&lt;/a&gt; より&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Rails哲学
+    &lt;ul&gt;
+      &lt;li&gt;同じことを繰り返すな (Don’t Repeat Yourself: DRY)&lt;/li&gt;
+      &lt;li&gt;設定より規約が優先される (Convention Over Configuration)
+        &lt;ul&gt;
+          &lt;li&gt;レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rails new -h&lt;/code&gt; でアプリケーションビルダで使えるすべてのオプションを確認できる&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する
+    &lt;ul&gt;
+      &lt;li&gt;マスアサインメント脆弱性対策&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create&lt;/span&gt;
+  &lt;span class=&quot;vi&quot;&gt;@article&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;new&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;article_params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+ 
+  &lt;span class=&quot;vi&quot;&gt;@article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;save&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;redirect_to&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@article&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+ 
+&lt;span class=&quot;kp&quot;&gt;private&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;article_params&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;permit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;記事モデルにbelongするコメントモデルの実装
+    &lt;ul&gt;
+      &lt;li&gt;以下で生成されるルーティングは　&lt;code class=&quot;highlighter-rouge&quot;&gt;/articles/1/comments&lt;/code&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;%= form_with(model: [ @article, @article.comments.build ], local: true) do |form| %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;create&lt;/span&gt;
+  &lt;span class=&quot;vi&quot;&gt;@article&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;Article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:article_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+  &lt;span class=&quot;vi&quot;&gt;@comment&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;vi&quot;&gt;@article&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;comments&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;comment_params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;link_to&lt;/code&gt; の書き方が見覚えなかったのでメモ&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &amp;lt;%= link_to 'Edit', edit_article_path(@article) %&amp;gt;
+ &amp;lt;%= link_to 'Destroy Comment', [comment.article, comment],
+               method: :delete,
+               data: { confirm: 'Are you sure?' } %&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;BASIC認証機能：簡易な認証システム
+    &lt;ul&gt;
+      &lt;li&gt;人気が高い認証システムは Devise と Authlogic&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt; &lt;span class=&quot;n&quot;&gt;http_basic_authenticate_with&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;name: &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;dhh&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;password: &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;secret&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;except: &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;ss&quot;&gt;:index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;ss&quot;&gt;:show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>hukurouo</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="Rails" />
+      
+
+      
+        <category term="study" />
+      
+
+      
+        <summary type="html">復習メモその１ Railsガイド - Railsをはじめよう より Rails哲学 同じことを繰り返すな (Don’t Repeat Yourself: DRY) 設定より規約が優先される (Convention Over Configuration) レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし rails new -h でアプリケーションビルダで使えるすべてのオプションを確認できる strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する マスアサインメント脆弱性対策 def create @article = Article.new(article_params) @article.save redirect_to @article end private def article_params params.require(:article).permit(:title, :text) end 記事モデルにbelongするコメントモデルの実装 以下で生成されるルーティングは　/articles/1/comments &amp;lt;%= form_with(model: [ @article, @article.comments.build ], local: true) do |form| %&amp;gt; def create @article = Article.find(params[:article_id]) @comment = @article.comments.create(comment_params) link_to の書き方が見覚えなかったのでメモ &amp;lt;%= link_to 'Edit', edit_article_path(@article) %&amp;gt; &amp;lt;%= link_to 'Destroy Comment', [comment.article, comment], method: :delete, data: { confirm: 'Are you sure?' } %&amp;gt; BASIC認証機能：簡易な認証システム 人気が高い認証システムは Devise と Authlogic http_basic_authenticate_with name: &quot;dhh&quot;, password: &quot;secret&quot;, except: [:index, :show]</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+  
+    <entry>
+      
+      <title type="html">DockerでJekyllをローカルで動かす</title>
+      
+      
+      <link href="https://hukurouo.github.io/memo/2020/05/22/Docker%E3%81%A7Jekyll%E3%82%92%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%99/" rel="alternate" type="text/html" title="DockerでJekyllをローカルで動かす" />
+      
+      <published>2020-05-22T15:17:29+00:00</published>
+      <updated>2020-05-22T15:17:29+00:00</updated>
+      <id>https://hukurouo.github.io/memo/2020/05/22/Docker%E3%81%A7Jekyll%E3%82%92%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%99</id>
+      <content type="html" xml:base="https://hukurouo.github.io/memo/2020/05/22/Docker%E3%81%A7Jekyll%E3%82%92%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%99/">&lt;p&gt;GithubPages＋Jekyllで技術ブログをつくってみました&lt;/p&gt;
+
+&lt;p&gt;Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://jamstackthemes.dev/ssg/jekyll/&quot;&gt;https://jamstackthemes.dev/ssg/jekyll/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;たくさんのテーマがありますね&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Dockerを立ち上げます&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$ docker pull jekyll/jekyll
+$ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します&lt;/p&gt;
+
+&lt;p&gt;あとは &lt;code class=&quot;highlighter-rouge&quot;&gt;bundle install&lt;/code&gt; して &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt; をすれば、起動します&lt;/p&gt;
+
+&lt;p&gt;ドキュメントには &lt;code class=&quot;highlighter-rouge&quot;&gt;bundle exec jekyll serve&lt;/code&gt; で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした…　&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>hukurouo</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="jekyll" />
+      
+        <category term="docker" />
+      
+
+      
+        <category term="memo" />
+      
+
+      
+        <summary type="html">GithubPages＋Jekyllで技術ブログをつくってみました Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します https://jamstackthemes.dev/ssg/jekyll/ たくさんのテーマがありますね Dockerを立ち上げます $ docker pull jekyll/jekyll $ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash 任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します あとは bundle install して jekyll serve をすれば、起動します ドキュメントには bundle exec jekyll serve で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした…　</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+</feed>

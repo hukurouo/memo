@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>DockerでJekyllをローカルで動かす</title>
+  <meta name="description" content="GithubPages＋Jekyllで技術ブログをつくってみました Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します https://jamstackthemes.dev/ssg/jekyll/ たくさんのテーマがありますね Dockerを立ち上げます $ docker pull jekyll/jekyll $ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash 任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します あとは bundle install して jekyll serve をすれば、起動します ドキュメントには bundle exec jekyll serve で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした…　">
+  
+
+  <link rel="stylesheet" href="/memo/assets/main.css">
+  <link rel="canonical" href="https://hukurouo.github.io/memo/2020/05/22/Docker%E3%81%A7Jekyll%E3%82%92%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%99/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="memonado" href="https://hukurouo.github.io/memo/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="DockerでJekyllをローカルで動かす">
+  <meta property="og:site_name" content="memonado">
+  <meta property="og:url" content="https://hukurouo.github.io/memo/2020/05/22/Docker%E3%81%A7Jekyll%E3%82%92%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E3%81%A7%E5%8B%95%E3%81%8B%E3%81%99/">
+  <meta property="og:description" content="GithubPages＋Jekyllで技術ブログをつくってみました Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します https://jamstackthemes.dev/ssg/jekyll/ たくさんのテーマがありますね Dockerを立ち上げます $ docker pull jekyll/jekyll $ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash 任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します あとは bundle install して jekyll serve をすれば、起動します ドキュメントには bundle exec jekyll serve で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした…　">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="hukurou_code">
+  <meta name="twitter:title" content="DockerでJekyllをローカルで動かす">
+  <meta name="twitter:description" content="GithubPages＋Jekyllで技術ブログをつくってみました Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します https://jamstackthemes.dev/ssg/jekyll/ たくさんのテーマがありますね Dockerを立ち上げます $ docker pull jekyll/j...">
+  
+    <meta name="twitter:creator" content="hukurou_code">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Bitter:400,400i,700&display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/memo/">memonado</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/memo/about/">About</a>
+      
+        
+        <a class="page-link" href="/memo/archives/">Archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">DockerでJekyllをローカルで動かす</h1>
+    
+    <p class="post-meta"><time datetime="2020-05-22T15:17:29+00:00" itemprop="datePublished">May 22, 2020</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/jekyll/">jekyll</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/docker/">docker</a>
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+        <a href="/memo/tags/memo/">memo</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>GithubPages＋Jekyllで技術ブログをつくってみました</p>
+
+<p>Jekyllでブログを建てるのはGitHubからフォークしてくるだけなので簡単なのですが、ローカルで動かすとなるとやや苦戦したのでメモに残します</p>
+
+<p><a href="https://jamstackthemes.dev/ssg/jekyll/">https://jamstackthemes.dev/ssg/jekyll/</a></p>
+
+<p>たくさんのテーマがありますね</p>
+
+<hr />
+
+<p>Dockerを立ち上げます</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ docker pull jekyll/jekyll
+$ docker container run -p 4000:4000 -it --name jekyll-test -v [任意のディレクトリ]/:/usr/src/app -w /usr/src/app jekyll/jekyll bash
+</code></pre></div></div>
+
+<p>任意のディレクトリにはGitHubからcloneしてきたJekyllディレクトリを指定します</p>
+
+<p>あとは <code class="highlighter-rouge">bundle install</code> して <code class="highlighter-rouge">jekyll serve</code> をすれば、起動します</p>
+
+<p>ドキュメントには <code class="highlighter-rouge">bundle exec jekyll serve</code> で起動しろと書いてあるのですが、なぜかこれだと繋がりませんでした…　</p>
+
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; hukurouo - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="https://hukurouo.github.io/memo/feed.xml">RSS</a>
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

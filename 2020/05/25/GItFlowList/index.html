@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>GitFlowのまとめ</title>
+  <meta name="description" content="GitFlow ブランチの寿命 長寿命ブランチ　→　develop、master 短寿命ブランチ　→　feature、release、hotfix develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 feature→developのマージは開発終了時のみとするフローシステム上の「契約」 developからmasterへのマージ時にreleaseブランチを作成し、動作を確認する。 マージタイミングの保証 masterブランチは常にリリース可能であるというフローシステム上の「契約」 リリースタイミングが来ない機能はfeatureおよびdevelopに保留する。 GithubFlow ブランチの寿命 長寿命ブランチ　→　master 短寿命ブランチ　→　feature develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 masterへのマージ時にpull requestを発行し、コードレビューを行う マージタイミングの保証 リリースタイミングが来ない機能はfeatureに保留する。 GitlabFlow ブランチ feature/hotfixは機能開発、不具合対応ブランチ masterはメインのブランチ pre-production(オプションブランチ)はリリース前のテスト用(GitFlowで言うreleaseブランチ) productionはリリース済みのコード置き場 機能開発/不具合対応 機能開発するとき、masterブランチからfeature/NAMEブランチを切って開発に進む 開発が終わったらfeatureブランチからmasterにMerge Requestを作成 masterをステージング環境へデプロイして、確認する プリプロダクションへデプロイしたい場合、masterブランチからpre-productionブランチへのMerge Requestを作成 マージ済みになるとデプロイする pre-productionブランチからproductionブランチへのMerge Requestを作成 マージ済みになるとデプロイする">
+  
+
+  <link rel="stylesheet" href="/memo/assets/main.css">
+  <link rel="canonical" href="https://hukurouo.github.io/memo/2020/05/25/GItFlowList/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="memonado" href="https://hukurouo.github.io/memo/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="GitFlowのまとめ">
+  <meta property="og:site_name" content="memonado">
+  <meta property="og:url" content="https://hukurouo.github.io/memo/2020/05/25/GItFlowList/">
+  <meta property="og:description" content="GitFlow ブランチの寿命 長寿命ブランチ　→　develop、master 短寿命ブランチ　→　feature、release、hotfix develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 feature→developのマージは開発終了時のみとするフローシステム上の「契約」 developからmasterへのマージ時にreleaseブランチを作成し、動作を確認する。 マージタイミングの保証 masterブランチは常にリリース可能であるというフローシステム上の「契約」 リリースタイミングが来ない機能はfeatureおよびdevelopに保留する。 GithubFlow ブランチの寿命 長寿命ブランチ　→　master 短寿命ブランチ　→　feature develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 masterへのマージ時にpull requestを発行し、コードレビューを行う マージタイミングの保証 リリースタイミングが来ない機能はfeatureに保留する。 GitlabFlow ブランチ feature/hotfixは機能開発、不具合対応ブランチ masterはメインのブランチ pre-production(オプションブランチ)はリリース前のテスト用(GitFlowで言うreleaseブランチ) productionはリリース済みのコード置き場 機能開発/不具合対応 機能開発するとき、masterブランチからfeature/NAMEブランチを切って開発に進む 開発が終わったらfeatureブランチからmasterにMerge Requestを作成 masterをステージング環境へデプロイして、確認する プリプロダクションへデプロイしたい場合、masterブランチからpre-productionブランチへのMerge Requestを作成 マージ済みになるとデプロイする pre-productionブランチからproductionブランチへのMerge Requestを作成 マージ済みになるとデプロイする">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="hukurou_code">
+  <meta name="twitter:title" content="GitFlowのまとめ">
+  <meta name="twitter:description" content="GitFlow ブランチの寿命 長寿命ブランチ　→　develop、master 短寿命ブランチ　→　feature、release、hotfix develop→featureのマージを随時行う。 リリースブランチの明確化　→　本番リリース可能なのはmasterのみ マージ時の動作保証 feature→developのマージは開発終了時のみとするフローシステム上の「契約」 developか...">
+  
+    <meta name="twitter:creator" content="hukurou_code">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Bitter:400,400i,700&display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/memo/">memonado</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/memo/about/">About</a>
+      
+        
+        <a class="page-link" href="/memo/archives/">Archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">GitFlowのまとめ</h1>
+    
+    <p class="post-meta"><time datetime="2020-05-25T10:46:44+00:00" itemprop="datePublished">May 25, 2020</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/git/">Git</a>
+      
+    
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+    
+      
+        <a href="/memo/tags/study/">study</a>,
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    
+    
+      
+        <a href="/memo/tags/memo/">memo</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <h4>GitFlow</h4>
+<ul>
+  <li>ブランチの寿命
+    <ul>
+      <li>長寿命ブランチ　→　develop、master</li>
+      <li>短寿命ブランチ　→　feature、release、hotfix</li>
+      <li>develop→featureのマージを随時行う。</li>
+    </ul>
+  </li>
+  <li>リリースブランチの明確化　→　本番リリース可能なのはmasterのみ</li>
+  <li>マージ時の動作保証
+    <ul>
+      <li>feature→developのマージは開発終了時のみとするフローシステム上の「契約」</li>
+      <li>developからmasterへのマージ時にreleaseブランチを作成し、動作を確認する。</li>
+    </ul>
+  </li>
+  <li>マージタイミングの保証
+    <ul>
+      <li>masterブランチは常にリリース可能であるというフローシステム上の「契約」</li>
+      <li>リリースタイミングが来ない機能はfeatureおよびdevelopに保留する。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>GithubFlow</h4>
+<ul>
+  <li>ブランチの寿命
+    <ul>
+      <li>長寿命ブランチ　→　master</li>
+      <li>短寿命ブランチ　→　feature</li>
+      <li>develop→featureのマージを随時行う。</li>
+    </ul>
+  </li>
+  <li>リリースブランチの明確化　→　本番リリース可能なのはmasterのみ</li>
+  <li>マージ時の動作保証
+    <ul>
+      <li>masterへのマージ時にpull requestを発行し、コードレビューを行う</li>
+    </ul>
+  </li>
+  <li>マージタイミングの保証
+    <ul>
+      <li>リリースタイミングが来ない機能はfeatureに保留する。</li>
+    </ul>
+  </li>
+</ul>
+
+<h4>GitlabFlow</h4>
+<ul>
+  <li>ブランチ
+    <ul>
+      <li>feature/hotfixは機能開発、不具合対応ブランチ</li>
+      <li>masterはメインのブランチ</li>
+      <li>pre-production(オプションブランチ)はリリース前のテスト用(GitFlowで言うreleaseブランチ)</li>
+      <li>productionはリリース済みのコード置き場</li>
+    </ul>
+  </li>
+  <li>機能開発/不具合対応
+    <ul>
+      <li>機能開発するとき、masterブランチからfeature/NAMEブランチを切って開発に進む</li>
+      <li>開発が終わったらfeatureブランチからmasterにMerge Requestを作成</li>
+      <li>masterをステージング環境へデプロイして、確認する</li>
+      <li>プリプロダクションへデプロイしたい場合、masterブランチからpre-productionブランチへのMerge Requestを作成 マージ済みになるとデプロイする</li>
+      <li>pre-productionブランチからproductionブランチへのMerge Requestを作成 マージ済みになるとデプロイする</li>
+    </ul>
+  </li>
+</ul>
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; hukurouo - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="https://hukurouo.github.io/memo/feed.xml">RSS</a>
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

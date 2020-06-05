@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Rails Study #2</title>
+  <meta name="description" content="学習メモその２ RailsGuide - デバッグ編 デバッグ &amp;lt;%= debug @article %&amp;gt; オブジェクトの中身をviewに表示 ログをカスタムしたい場合は、以下 この場合、コントローラの途中でオブジェクトの中身を確認できる def create @article = Article.new(article_params) logger.debug &quot;新しい記事: #{@article.attributes.inspect}&quot; logger.debug &quot;記事が正しいかどうか: #{@article.valid?}&quot; RailsGuide - ActiveRecord:マイグレーション Active Recordは、「知的に振る舞うのはモデルであり、データベースではない」というコンセプトに基づいています。 カラムの作成時や変更時に、カラムの修飾子を適用できる limit: string/text/binary/integerフィールドの最大サイズを設定します。 precision: decimalフィールドの精度 (precision) を定義します。この精度は、その数字の総桁数で表されます。 scale: decimalフィールドの精度 (スケール: scale) を指定します。この精度は小数点以下の桁数で表されます。 polymorphic: belongs_to関連付けで使うtypeカラムを追加します。 null: カラムでNULL値を許可または禁止します。 default: カラムでのデフォルト値の設定を許可します。dateなどの動的な値を使う場合は、デフォルト値は最初 (マイグレーションが実行された日付など) にしか計算されないことに注意してください。 index: カラムにインデックスを追加します。 comment: カラムにコメントを追加します。 既存のマイグレーションを直接変更するのは一般的によくない（共同作業者にまで余分な作業を強いることになるので） マイグレーションを新たに生成し、それを編集するのが一番良い 自分でマイグレーションファイルを書くときは、とりあえずchangeメソッドを使っておけばロールバックが出来るので、安全">
+  
+
+  <link rel="stylesheet" href="/memo/assets/main.css">
+  <link rel="canonical" href="https://hukurouo.github.io/memo/2020/05/30/rails_study_debug/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="memonado" href="https://hukurouo.github.io/memo/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Rails Study #2">
+  <meta property="og:site_name" content="memonado">
+  <meta property="og:url" content="https://hukurouo.github.io/memo/2020/05/30/rails_study_debug/">
+  <meta property="og:description" content="学習メモその２ RailsGuide - デバッグ編 デバッグ &amp;lt;%= debug @article %&amp;gt; オブジェクトの中身をviewに表示 ログをカスタムしたい場合は、以下 この場合、コントローラの途中でオブジェクトの中身を確認できる def create @article = Article.new(article_params) logger.debug &quot;新しい記事: #{@article.attributes.inspect}&quot; logger.debug &quot;記事が正しいかどうか: #{@article.valid?}&quot; RailsGuide - ActiveRecord:マイグレーション Active Recordは、「知的に振る舞うのはモデルであり、データベースではない」というコンセプトに基づいています。 カラムの作成時や変更時に、カラムの修飾子を適用できる limit: string/text/binary/integerフィールドの最大サイズを設定します。 precision: decimalフィールドの精度 (precision) を定義します。この精度は、その数字の総桁数で表されます。 scale: decimalフィールドの精度 (スケール: scale) を指定します。この精度は小数点以下の桁数で表されます。 polymorphic: belongs_to関連付けで使うtypeカラムを追加します。 null: カラムでNULL値を許可または禁止します。 default: カラムでのデフォルト値の設定を許可します。dateなどの動的な値を使う場合は、デフォルト値は最初 (マイグレーションが実行された日付など) にしか計算されないことに注意してください。 index: カラムにインデックスを追加します。 comment: カラムにコメントを追加します。 既存のマイグレーションを直接変更するのは一般的によくない（共同作業者にまで余分な作業を強いることになるので） マイグレーションを新たに生成し、それを編集するのが一番良い 自分でマイグレーションファイルを書くときは、とりあえずchangeメソッドを使っておけばロールバックが出来るので、安全">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="hukurou_code">
+  <meta name="twitter:title" content="Rails Study #2">
+  <meta name="twitter:description" content="学習メモその２ RailsGuide - デバッグ編 デバッグ &amp;lt;%= debug @article %&amp;gt; オブジェクトの中身をviewに表示 ログをカスタムしたい場合は、以下 この場合、コントローラの途中でオブジェクトの中身を確認できる def create @article = Article.new(article_params) logger.debug ...">
+  
+    <meta name="twitter:creator" content="hukurou_code">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Bitter:400,400i,700&display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/memo/">memonado</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/memo/about/">About</a>
+      
+        
+        <a class="page-link" href="/memo/archives/">Archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Rails Study #2</h1>
+    
+    <p class="post-meta"><time datetime="2020-05-30T04:24:44+00:00" itemprop="datePublished">May 30, 2020</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/rails/">Rails</a>
+      
+    
+      
+    
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+    
+      
+        <a href="/memo/tags/study/">study</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>学習メモその２</p>
+
+<hr />
+
+<blockquote>
+  <p><a href="https://railsguides.jp/debugging_rails_applications.html">RailsGuide - デバッグ編</a></p>
+</blockquote>
+
+<ul>
+  <li>デバッグ
+    <ul>
+      <li><code class="highlighter-rouge">&lt;%= debug @article %&gt;</code></li>
+      <li>オブジェクトの中身をviewに表示</li>
+    </ul>
+  </li>
+  <li>ログをカスタムしたい場合は、以下
+    <ul>
+      <li>この場合、コントローラの途中でオブジェクトの中身を確認できる</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> def create
+    @article = Article.new(article_params)
+    logger.debug "新しい記事: #{@article.attributes.inspect}"
+    logger.debug "記事が正しいかどうか: #{@article.valid?}"
+</code></pre></div></div>
+
+<p><br /></p>
+<blockquote>
+  <p><a href="https://railsguides.jp/active_record_basics.html">RailsGuide - ActiveRecord:マイグレーション</a></p>
+</blockquote>
+
+<blockquote>
+  <p>Active Recordは、「知的に振る舞うのはモデルであり、データベースではない」というコンセプトに基づいています。</p>
+</blockquote>
+
+<p>カラムの作成時や変更時に、カラムの修飾子を適用できる</p>
+
+<ul>
+  <li>limit: string/text/binary/integerフィールドの最大サイズを設定します。</li>
+  <li>precision: decimalフィールドの精度 (precision) を定義します。この精度は、その数字の総桁数で表されます。</li>
+  <li>scale: decimalフィールドの精度 (スケール: scale) を指定します。この精度は小数点以下の桁数で表されます。</li>
+  <li>polymorphic: belongs_to関連付けで使うtypeカラムを追加します。</li>
+  <li>null: カラムでNULL値を許可または禁止します。</li>
+  <li>default: カラムでのデフォルト値の設定を許可します。dateなどの動的な値を使う場合は、デフォルト値は最初 (マイグレーションが実行された日付など) にしか計算されないことに注意してください。</li>
+  <li>index: カラムにインデックスを追加します。</li>
+  <li>comment: カラムにコメントを追加します。</li>
+</ul>
+
+<p>既存のマイグレーションを直接変更するのは一般的によくない（共同作業者にまで余分な作業を強いることになるので）</p>
+
+<p>マイグレーションを新たに生成し、それを編集するのが一番良い</p>
+
+<p>自分でマイグレーションファイルを書くときは、とりあえずchangeメソッドを使っておけばロールバックが出来るので、安全</p>
+
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; hukurouo - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="https://hukurouo.github.io/memo/feed.xml">RSS</a>
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

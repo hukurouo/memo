@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  
+  
+  <title>Rails Study #1</title>
+  <meta name="description" content="復習メモその１ Railsガイド - Railsをはじめよう より Rails哲学 同じことを繰り返すな (Don’t Repeat Yourself: DRY) 設定より規約が優先される (Convention Over Configuration) レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし rails new -h でアプリケーションビルダで使えるすべてのオプションを確認できる strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する マスアサインメント脆弱性対策 def create @article = Article.new(article_params) @article.save redirect_to @article end private def article_params params.require(:article).permit(:title, :text) end 記事モデルにbelongするコメントモデルの実装 以下で生成されるルーティングは　/articles/1/comments &amp;lt;%= form_with(model: [ @article, @article.comments.build ], local: true) do |form| %&amp;gt; def create @article = Article.find(params[:article_id]) @comment = @article.comments.create(comment_params) link_to の書き方が見覚えなかったのでメモ &amp;lt;%= link_to &#39;Edit&#39;, edit_article_path(@article) %&amp;gt; &amp;lt;%= link_to &#39;Destroy Comment&#39;, [comment.article, comment], method: :delete, data: { confirm: &#39;Are you sure?&#39; } %&amp;gt; BASIC認証機能：簡易な認証システム 人気が高い認証システムは Devise と Authlogic http_basic_authenticate_with name: &quot;dhh&quot;, password: &quot;secret&quot;, except: [:index, :show]">
+  
+
+  <link rel="stylesheet" href="/memo/assets/main.css">
+  <link rel="canonical" href="https://hukurouo.github.io/memo/2020/05/23/rails_study_1/">
+  
+  
+  <link rel="alternate" type="application/rss+xml" title="memonado" href="https://hukurouo.github.io/memo/feed.xml">
+
+  
+
+  
+  <meta property="og:title" content="Rails Study #1">
+  <meta property="og:site_name" content="memonado">
+  <meta property="og:url" content="https://hukurouo.github.io/memo/2020/05/23/rails_study_1/">
+  <meta property="og:description" content="復習メモその１ Railsガイド - Railsをはじめよう より Rails哲学 同じことを繰り返すな (Don’t Repeat Yourself: DRY) 設定より規約が優先される (Convention Over Configuration) レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし rails new -h でアプリケーションビルダで使えるすべてのオプションを確認できる strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する マスアサインメント脆弱性対策 def create @article = Article.new(article_params) @article.save redirect_to @article end private def article_params params.require(:article).permit(:title, :text) end 記事モデルにbelongするコメントモデルの実装 以下で生成されるルーティングは　/articles/1/comments &amp;lt;%= form_with(model: [ @article, @article.comments.build ], local: true) do |form| %&amp;gt; def create @article = Article.find(params[:article_id]) @comment = @article.comments.create(comment_params) link_to の書き方が見覚えなかったのでメモ &amp;lt;%= link_to &#39;Edit&#39;, edit_article_path(@article) %&amp;gt; &amp;lt;%= link_to &#39;Destroy Comment&#39;, [comment.article, comment], method: :delete, data: { confirm: &#39;Are you sure?&#39; } %&amp;gt; BASIC認証機能：簡易な認証システム 人気が高い認証システムは Devise と Authlogic http_basic_authenticate_with name: &quot;dhh&quot;, password: &quot;secret&quot;, except: [:index, :show]">
+  
+  
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="hukurou_code">
+  <meta name="twitter:title" content="Rails Study #1">
+  <meta name="twitter:description" content="復習メモその１ Railsガイド - Railsをはじめよう より Rails哲学 同じことを繰り返すな (Don’t Repeat Yourself: DRY) 設定より規約が優先される (Convention Over Configuration) レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし rails new -h でアプリケーションビルダで使え...">
+  
+    <meta name="twitter:creator" content="hukurou_code">
+  
+  
+
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css?family=Bitter:400,400i,700&display=swap" rel="stylesheet">
+
+  
+
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/memo/">memonado</a>
+
+    <nav class="site-nav">
+      
+        
+        <a class="page-link" href="/memo/about/">About</a>
+      
+        
+        <a class="page-link" href="/memo/archives/">Archives</a>
+      
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    
+      <h1 class="post-title" itemprop="name headline">Rails Study #1</h1>
+    
+    <p class="post-meta"><time datetime="2020-05-23T04:24:44+00:00" itemprop="datePublished">May 23, 2020</time> •
+  
+    
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <a href="/memo/categories/rails/">Rails</a>
+      
+    
+      
+    
+      
+    
+  
+
+
+ •
+  
+    
+    
+      
+    
+      
+        <a href="/memo/tags/study/">study</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+
+</p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>復習メモその１</p>
+
+<p><a href="https://railsguides.jp/getting_started.html">Railsガイド - Railsをはじめよう</a> より</p>
+
+<hr />
+
+<ul>
+  <li>Rails哲学
+    <ul>
+      <li>同じことを繰り返すな (Don’t Repeat Yourself: DRY)</li>
+      <li>設定より規約が優先される (Convention Over Configuration)
+        <ul>
+          <li>レールから外れると碌なことにならないので、自己流で書くのは控え、正攻法を調べるべし</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p><code class="highlighter-rouge">rails new -h</code> でアプリケーションビルダで使えるすべてのオプションを確認できる</p>
+  </li>
+  <li>strong_parameters : 本当に使ってよいパラメータだけを厳密に指定する
+    <ul>
+      <li>マスアサインメント脆弱性対策</li>
+    </ul>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">create</span>
+  <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">article_params</span><span class="p">)</span>
+ 
+  <span class="vi">@article</span><span class="p">.</span><span class="nf">save</span>
+  <span class="n">redirect_to</span> <span class="vi">@article</span>
+<span class="k">end</span>
+ 
+<span class="kp">private</span>
+  <span class="k">def</span> <span class="nf">article_params</span>
+    <span class="n">params</span><span class="p">.</span><span class="nf">require</span><span class="p">(</span><span class="ss">:article</span><span class="p">).</span><span class="nf">permit</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:text</span><span class="p">)</span>
+  <span class="k">end</span></code></pre></figure>
+
+<ul>
+  <li>記事モデルにbelongするコメントモデルの実装
+    <ul>
+      <li>以下で生成されるルーティングは　<code class="highlighter-rouge">/articles/1/comments</code></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;%= form_with(model: [ @article, @article.comments.build ], local: true) do |form| %&gt;
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">create</span>
+  <span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="ss">:article_id</span><span class="p">])</span>
+  <span class="vi">@comment</span> <span class="o">=</span> <span class="vi">@article</span><span class="p">.</span><span class="nf">comments</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="n">comment_params</span><span class="p">)</span></code></pre></figure>
+
+<ul>
+  <li><code class="highlighter-rouge">link_to</code> の書き方が見覚えなかったのでメモ</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code> &lt;%= link_to 'Edit', edit_article_path(@article) %&gt;
+ &lt;%= link_to 'Destroy Comment', [comment.article, comment],
+               method: :delete,
+               data: { confirm: 'Are you sure?' } %&gt;
+</code></pre></div></div>
+
+<ul>
+  <li>BASIC認証機能：簡易な認証システム
+    <ul>
+      <li>人気が高い認証システムは Devise と Authlogic</li>
+    </ul>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"> <span class="n">http_basic_authenticate_with</span> <span class="ss">name: </span><span class="s2">"dhh"</span><span class="p">,</span> <span class="ss">password: </span><span class="s2">"secret"</span><span class="p">,</span> <span class="ss">except: </span><span class="p">[</span><span class="ss">:index</span><span class="p">,</span> <span class="ss">:show</span><span class="p">]</span></code></pre></figure>
+
+
+  </div>
+
+  
+
+</article>
+
+      </div>
+    </main>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <p>
+      
+
+&copy; hukurouo - Powered by <a href="https://jekyllrb.com">Jekyll</a> &amp; <a href="https://github.com/yous/whiteglass">whiteglass</a> - Subscribe via <a href="https://hukurouo.github.io/memo/feed.xml">RSS</a>
+
+    </p>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
